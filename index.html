@@ -551,7 +551,10 @@
             hideModal();
         }
 
-        btnConnect.addEventListener('click', connectBluetooth);
+        btnConnect.addEventListener('click', () => {
+          connectBluetooth();
+          alarmModal.classList.remove('hidden');
+        });
         btnDisconnect.addEventListener('click', disconnectBluetooth);
     </script>
 </body>
