@@ -156,7 +156,6 @@
     <script>
 
         let defaultTimes = ['08:00', '13:00', '19:00'];
-      
         const audioNormal = document.getElementById('audioNormal');
         const audioTime = document.getElementById('audioTime');
         const audioConfirm = document.getElementById('audioConfirm');
@@ -195,13 +194,13 @@
             audioTime.currentTime = 0;
         }
 
-        // D 신호: "약 복용이 확인되었습니다" 음성 1회 재생
+        // C 신호: "약 복용이 확인되었습니다" 음성 1회 재생
         function playConfirmVoice() {
             stopAllVoice();
             audioConfirm.play().catch(e => console.log("오디오 재생 대기 중:", e));
         }
 
-        // C 신호: "약통이 비었습니다" 음성 1회 재생
+        // D 신호: "약통이 비었습니다" 음성 1회 재생
         function playEmptyVoice() {
             stopAllVoice();
             audioEmpty.play().catch(e => console.log("오디오 재생 대기 중:", e));
@@ -383,14 +382,6 @@
                     messageText.className = 'text-2xl font-bold text-yellow-800 break-keep leading-snug';
                     playEmptyVoice();
                     break;
-
-                case 'D':
-                    messageBox.classList.add('bg-teal-50', 'border-teal-300');
-                    messageIcon.className = 'fa-solid fa-mug-hot text-6xl text-teal-400 mb-4';
-                    messageText.innerHTML = "아직 약 복용 시간이<br>아닙니다.";
-                    messageText.className = 'text-2xl font-bold text-teal-800 break-keep leading-snug';
-                    playConfirmVoice()
-                    break;
             }
         }
 
@@ -446,7 +437,6 @@
             if (receivedString == 'MODE_1') updateStatusUI('A');
             else if (receivedString == 'MODE_2') updateStatusUI('B');
             else if (receivedString == 'MODE_3') updateStatusUI('C');
-          else if (receivedString == 'MODE_4') updateStatusUI('D');
         }
 
         async function disconnectBluetooth() {
