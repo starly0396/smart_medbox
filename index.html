@@ -450,15 +450,51 @@
             lastPolledValue = null;
         }
 
+        // [신규] 이 기기가 가진 모든 서비스/캐릭터리스틱과 지원 속성을 화면에 찍어줌
+        async function debugScanAllCharacteristics(server) {
+            try {
+                const services = await server.getPrimaryServices();
+                debugLog('=== 서비스 ' + services.length + '개 발견 ===');
+                for (const svc of services) {
+                    debugLog('[서비스] ' + svc.uuid);
+                    const chars = await svc.getCharacteristics();
+                    for (const ch of chars) {
+                        const p = ch.properties;
+                        const propsStr = [
+                            p.read ? 'read' : null,
+                            p.write ? 'write' : null,
+                            p.writeWithoutResponse ? 'writeNoResp' : null,
+                            p.notify ? 'notify' : null,
+                            p.indicate ? 'indicate' : null
+                        ].filter(Boolean).join(',');
+                        debugLog('  ㄴ캐릭터리스틱 ' + ch.uuid + ' [' + propsStr + ']');
+                    }
+                }
+                debugLog('=== 스캔 끝 ===');
+            } catch (e) {
+                debugLog('스캔 실패: ' + e.name + ' / ' + e.message);
+            }
+        }
+
         async function connectBluetooth() {
             try {
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [0xFFE0] }]
+                    filters: [{ services: [0xFFE0] }],
+                    optionalServices: [0xFFE0]
                 });
 
                 const server = await bluetoothDevice.gatt.connect();
+
+                // [신규] 실제 구조 확인용 전체 스캔
+                await debugScanAllCharacteristics(server);
+
                 const service = await server.getPrimaryService(HM10_SERVICE_UUID);
                 bluetoothCharacteristic = await service.getCharacteristic(HM10_CHARACTERISTIC_UUID);
+
+                debugLog('사용 캐릭터리스틱 속성: read=' + bluetoothCharacteristic.properties.read +
+                         ' notify=' + bluetoothCharacteristic.properties.notify +
+                         ' write=' + bluetoothCharacteristic.properties.write +
+                         ' writeNoResp=' + bluetoothCharacteristic.properties.writeWithoutResponse);
 
                 // Notify도 일단 구독은 시도 (지원되는 모듈이면 정상 동작하니 남겨둠)
                 await bluetoothCharacteristic.startNotifications();
