@@ -413,11 +413,14 @@
 
             } catch (error) {
                 console.error('연결 실패 - name:', error.name, '/ message:', error.message);
+                console.log('연결불가');
                 document.getElementById("connectErrorWindow").style.display = "block";
             }
         }
 
         function handleNotifications(event) {
+
+            console.log('이벤트 실행됨');
             
             const value = event.target.value;
             const decoder = new TextDecoder('utf-8');
