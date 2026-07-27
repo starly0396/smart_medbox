@@ -315,7 +315,7 @@
             lastCheckedMinuteKey = minuteKey;
 
             if (doseTimes.includes(nowTimeStr)) {
-                sendToArduino('TIME');
+                sendToArduino('T');
                 updateStatusUI('T');
             }
         }
@@ -397,7 +397,7 @@
         // 확인(알람 끄기) 버튼 클릭 시 BSA 신호 전송
         btnStopAlarm.addEventListener('click', () => {
             hideModal();
-            updateStatusUI('S');
+            sendToArduino('S');
         });
 
         let bluetoothDevice;
