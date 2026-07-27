@@ -310,16 +310,7 @@
                     showModal();
                     break;
                     
-                // case 'C':
-                //     messageBox.classList.add('bg-blue-50', 'border-blue-300');
-                //     messageIcon.className = 'fa-solid fa-circle-check text-6xl text-blue-500 mb-4';
-                //     messageText.innerHTML = "약 복용이<br>확인되었습니다.";
-                //     messageText.className = 'text-2xl font-bold text-blue-800 break-keep leading-snug';
-                //     playConfirmVoice();
-                //     hideModal();
-                //     break;
-                    
-                case 'D':
+                case 'C':
                     messageBox.classList.add('bg-yellow-50', 'border-yellow-400');
                     messageIcon.className = 'fa-solid fa-triangle-exclamation text-6xl text-yellow-500 mb-4';
                     messageText.innerHTML = "약통이 비었습니다.<br>약을 채워주세요.";
@@ -367,10 +358,9 @@
             const decoder = new TextDecoder('utf-8');
             let receivedString = decoder.decode(value).trim();
             
-            if (receivedString.includes('MODE_1')) updateStatusUI('A');
-            else if (receivedString.includes('MODE_2')) updateStatusUI('B');
-            // else if (receivedString.includes('C')) updateStatusUI('C');
-            else if (receivedString.includes('MODE_3')) updateStatusUI('D');
+            if (receivedString == 'MODE_1') updateStatusUI('A');
+            else if (receivedString == 'MODE_2') updateStatusUI('B');
+            else if (receivedString == 'MODE_3') updateStatusUI('C');
         }
 
         async function disconnectBluetooth() {
