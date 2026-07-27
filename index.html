@@ -367,10 +367,10 @@
             const decoder = new TextDecoder('utf-8');
             let receivedString = decoder.decode(value).trim();
             
-            if (receivedString.includes('A')) updateStatusUI('A');
-            else if (receivedString.includes('B')) updateStatusUI('B');
+            if (receivedString.includes('MODE_1')) updateStatusUI('A');
+            else if (receivedString.includes('MODE_2')) updateStatusUI('B');
             // else if (receivedString.includes('C')) updateStatusUI('C');
-            else if (receivedString.includes('D')) updateStatusUI('D');
+            else if (receivedString.includes('MODE_3')) updateStatusUI('D');
         }
 
         async function disconnectBluetooth() {
