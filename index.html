@@ -153,7 +153,21 @@
         </div>
     </div>
 
+    <!-- 디버그 로그 박스 (화면에서 직접 확인용) -->
+    <div id="debugBox" style="position:fixed; bottom:0; left:0; right:0; max-height:35vh; overflow-y:auto; background:rgba(0,0,0,0.85); color:#0f0; font-family:monospace; font-size:12px; padding:8px; z-index:9999; white-space:pre-wrap;"></div>
+
     <script>
+        function debugLog(msg) {
+            const box = document.getElementById('debugBox');
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.textContent = `[${time}] ${msg}`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+            // 너무 길어지면 오래된 줄 삭제
+            while (box.children.length > 30) box.removeChild(box.firstChild);
+        }
+
         let defaultTimes = ['08:00', '13:00', '19:00'];
         const audioNormal = document.getElementById('audioNormal');
         const audioTime = document.getElementById('audioTime');
@@ -399,24 +413,31 @@
 
         function startPolling() {
             stopPolling(); // 혹시 남아있던 인터벌 정리
+            debugLog('폴링 시작됨');
             btPollInterval = setInterval(async () => {
-                if (!bluetoothCharacteristic) return;
+                if (!bluetoothCharacteristic) {
+                    debugLog('characteristic 없음');
+                    return;
+                }
                 try {
                     const value = await bluetoothCharacteristic.readValue();
                     const decoder = new TextDecoder('utf-8');
                     const receivedString = decoder.decode(value).trim();
 
+                    debugLog('읽음: "' + receivedString + '" (길이:' + receivedString.length + ')');
+
                     if (!receivedString) return;
                     if (receivedString === lastPolledValue) return; // 이전과 같은 값이면 무시
                     lastPolledValue = receivedString;
 
-                    console.log('폴링 수신:', receivedString);
+                    debugLog('새 값 감지 → 처리: ' + receivedString);
 
                     if (receivedString === 'MODE_1') updateStatusUI('A');
                     else if (receivedString === 'MODE_2') updateStatusUI('B');
                     else if (receivedString === 'MODE_3') updateStatusUI('C');
+                    else debugLog('알 수 없는 값이라 매칭 안 됨: "' + receivedString + '"');
                 } catch (e) {
-                    console.error('폴링 읽기 실패:', e);
+                    debugLog('읽기 에러: ' + e.name + ' / ' + e.message);
                 }
             }, 1000); // 1초 간격
         }
@@ -455,7 +476,7 @@
                 updateStatusUI('A'); 
 
             } catch (error) {
-                console.error('연결 실패 - name:', error.name, '/ message:', error.message);
+                debugLog('연결 실패: ' + error.name + ' / ' + error.message);
                 document.getElementById("connectErrorWindow").style.display = "block";
             }
         }
@@ -464,6 +485,7 @@
             const value = event.target.value;
             const decoder = new TextDecoder('utf-8');
             let receivedString = decoder.decode(value).trim();
+            debugLog('[notify 이벤트] "' + receivedString + '"');
             
             if (receivedString == 'MODE_1') updateStatusUI('A');
             else if (receivedString == 'MODE_2') updateStatusUI('B');
