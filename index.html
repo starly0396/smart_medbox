@@ -257,6 +257,45 @@
             }
         }
 
+        function updateStatusUI(signal) {
+            messageBox.className = 'flex-1 rounded-2xl p-6 border-2 flex flex-col justify-center items-center min-h-[180px] text-center transition-all duration-500 shadow-inner';
+            
+            switch(signal) {
+              case 'A':
+                messageBox.classList.add('bg-teal-50', 'border-teal-300');
+                messageIcon.className = 'fa-solid fa-mug-hot text-6xl text-teal-400 mb-4';
+                messageText.innerHTML = "아직 약 복용 시간이<br>아닙니다.";
+                messageText.className = 'text-2xl font-bold text-teal-800 break-keep leading-snug';
+                playNormalVoice();
+                break;
+                  
+              case 'T':
+                messageBox.classList.add('bg-red-50', 'border-red-400');
+                messageIcon.className = 'fa-solid fa-capsules fa-bounce text-6xl text-red-500 mb-4';
+                messageText.innerHTML = "지금 약 드실 시간입니다!";
+                messageText.className = 'text-2xl font-bold text-red-700 break-keep leading-snug';
+                playAlarmVoice();
+                showModal();
+                break;
+
+              case 'B':
+                messageBox.classList.add('bg-teal-50', 'border-teal-300');
+                messageIcon.className = 'fa-solid fa-mug-hot text-6xl text-teal-400 mb-4';
+                messageText.innerHTML = "아직 약 복용 시간이<br>아닙니다.";
+                messageText.className = 'text-2xl font-bold text-teal-800 break-keep leading-snug';
+                playConfirmVoice();
+                break;
+                  
+              case 'C':
+                messageBox.classList.add('bg-yellow-50', 'border-yellow-400');
+                messageIcon.className = 'fa-solid fa-triangle-exclamation text-6xl text-yellow-500 mb-4';
+                messageText.innerHTML = "약통이 비었습니다.<br>약을 채워주세요.";
+                messageText.className = 'text-2xl font-bold text-yellow-800 break-keep leading-snug';
+                playEmptyVoice();
+                break;
+            }
+        }
+
         // ==================================================
         // 설정된 복용 시간 목록 + 시간 일치 체크
         // ==================================================
@@ -277,6 +316,7 @@
 
             if (doseTimes.includes(nowTimeStr)) {
                 sendToArduino('TIME');
+                updateStatusUI('T');
             }
         }
 
@@ -355,50 +395,7 @@
         }
 
         // 확인(알람 끄기) 버튼 클릭 시 BSA 신호 전송
-        btnStopAlarm.addEventListener('click', () => {
-            hideModal();
-            sendToArduino('BSA');
-        });
-
-        function updateStatusUI(signal) {
-            messageBox.className = 'flex-1 rounded-2xl p-6 border-2 flex flex-col justify-center items-center min-h-[180px] text-center transition-all duration-500 shadow-inner';
-            
-            switch(signal) {
-                case 'A':
-                    messageBox.classList.add('bg-teal-50', 'border-teal-300');
-                    messageIcon.className = 'fa-solid fa-mug-hot text-6xl text-teal-400 mb-4';
-                    messageText.innerHTML = "아직 약 복용 시간이<br>아닙니다.";
-                    messageText.className = 'text-2xl font-bold text-teal-800 break-keep leading-snug';
-                    playNormalVoice();
-                    break;
-                    
-                case 'B':
-                    messageBox.classList.add('bg-red-50', 'border-red-400');
-                    messageIcon.className = 'fa-solid fa-capsules fa-bounce text-6xl text-red-500 mb-4';
-                    messageText.innerHTML = "지금 약 드실 시간입니다!";
-                    messageText.className = 'text-2xl font-bold text-red-700 break-keep leading-snug';
-                    playAlarmVoice();
-                    showModal();
-                    break;
-                    
-                case 'C':
-                    messageBox.classList.add('bg-yellow-50', 'border-yellow-400');
-                    messageIcon.className = 'fa-solid fa-triangle-exclamation text-6xl text-yellow-500 mb-4';
-                    messageText.innerHTML = "약통이 비었습니다.<br>약을 채워주세요.";
-                    messageText.className = 'text-2xl font-bold text-yellow-800 break-keep leading-snug';
-                    playEmptyVoice();
-                    break;
-
-                case 'D':
-                    // 약 꺼냄(복용) 확인 상태
-                    messageBox.classList.add('bg-green-50', 'border-green-300');
-                    messageIcon.className = 'fa-solid fa-circle-check text-6xl text-green-500 mb-4';
-                    messageText.innerHTML = "약 꺼냄이<br>확인되었습니다.";
-                    messageText.className = 'text-2xl font-bold text-green-800 break-keep leading-snug';
-                    playConfirmVoice();
-                    break;
-            }
-        }
+        btnStopAlarm.addEventListener('click', hideModal);
 
         let bluetoothDevice;
         let bluetoothCharacteristic;
@@ -447,10 +444,9 @@
 
         // 아두이노에서 받은 신호 문자열을 UI에 반영하는 공통 처리
         function applyReceivedSignal(receivedString) {
-            if (receivedString === 'MODE_1') updateStatusUI('A');
-            else if (receivedString === 'MODE_2') updateStatusUI('B');
-            else if (receivedString === 'MODE_3') updateStatusUI('C');
-            else if (receivedString === 'MODE_4') updateStatusUI('D');
+            if (receivedString === 'A') updateStatusUI('A');
+            else if (receivedString === 'B') updateStatusUI('B');
+            else if (receivedString === 'C') updateStatusUI('C');
         }
 
         async function connectBluetooth() {
