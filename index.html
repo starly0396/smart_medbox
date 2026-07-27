@@ -419,9 +419,12 @@
         }
 
         function handleNotifications(event) {
+            
             const value = event.target.value;
             const decoder = new TextDecoder('utf-8');
             let receivedString = decoder.decode(value).trim();
+
+            window.alert(receivedString);
             
             if (receivedString == 'MODE_1') updateStatusUI('A');
             else if (receivedString == 'MODE_2') updateStatusUI('B');
