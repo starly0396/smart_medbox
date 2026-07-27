@@ -154,6 +154,7 @@
     </div>
 
     <script>
+        let defaultTimes = ['08:00', '13:00', '19:00'];
         const audioNormal = document.getElementById('audioNormal');
         const audioTime = document.getElementById('audioTime');
         const audioConfirm = document.getElementById('audioConfirm');
@@ -229,10 +230,54 @@
         const alarmModal = document.getElementById('alarmModal');
         const btnStopAlarm = document.getElementById('btnStopAlarm');
 
+        // ==================================================
+        // [신규] 아두이노로 값 보내기 공통 함수
+        // ==================================================
+        async function sendToArduino(text) {
+            if (!bluetoothCharacteristic) {
+                console.warn('블루투스가 연결되어 있지 않아 전송을 건너뜁니다:', text);
+                return;
+            }
+            const data = new TextEncoder().encode(text + '\n');
+            try {
+                if (bluetoothCharacteristic.writeValueWithoutResponse) {
+                    await bluetoothCharacteristic.writeValueWithoutResponse(data);
+                } else {
+                    await bluetoothCharacteristic.writeValue(data);
+                }
+            } catch (error) {
+                console.error('전송 실패:', text, error);
+            }
+        }
+
+        // ==================================================
+        // [신규] 설정된 복용 시간 목록 + 시간 일치 체크
+        // ==================================================
+        let doseTimes = [];              // 중복 제거된 "HH:MM" 시간 배열
+        let lastCheckedMinuteKey = null;  // 같은 분(分)에 중복 전송 방지용
+
+        function checkScheduleTime() {
+            if (doseTimes.length === 0) return;
+
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const nowTimeStr = `${hh}:${mm}`;
+            const minuteKey = `${now.toDateString()}_${nowTimeStr}`; // 날짜+시:분 고유값
+
+            if (minuteKey === lastCheckedMinuteKey) return; // 이미 이 분에 체크함
+            lastCheckedMinuteKey = minuteKey;
+
+            if (doseTimes.includes(nowTimeStr)) {
+                sendToArduino('TIME');
+            }
+        }
+
+        setInterval(checkScheduleTime, 5000); // 5초 간격으로 분 변경 감지
+
         function renderTimeInputs() {
             const count = parseInt(doseCount.value);
-            timeInputsContainer.innerHTML = '';
-            const defaultTimes = ['08:00', '13:00', '19:00'];
+            timeInputsContainer.innerHTML = ''
 
             for (let i = 0; i < count; i++) {
                 const div = document.createElement('div');
@@ -257,20 +302,35 @@
             renderTimeInputs();
         });
 
+        // ==================================================
+        // [수정] 설정 완료: 중복 시간 통합 + COUNT 전송
+        // ==================================================
         btnSavePeriod.addEventListener('click', () => {
             if (startDate.value && endDate.value) {
-                const count = doseCount.value;
-                let timesStr = '';
-                
-                for (let i = 0; i < parseInt(count); i++) {
+                const count = parseInt(doseCount.value);
+                let rawTimes = [];
+
+                for (let i = 0; i < count; i++) {
                     const timeVal = document.getElementById(`doseTime_${i}`).value;
-                    timesStr += `${timeVal} `;
+                    if (timeVal) rawTimes.push(timeVal);
                 }
+
+                // 3. 중복된 시간 통합 (Set으로 중복 제거 후 시간순 정렬)
+                doseTimes = [...new Set(rawTimes)].sort();
 
                 periodDisplay.innerHTML = `
                     📅 ${startDate.value} ~ ${endDate.value}<br>
-                    ⏰ 하루 ${count}회 (${timesStr.trim().replace(/ /g, ', ')})
+                    ⏰ 하루 ${doseTimes.length}회 (${doseTimes.join(', ')})
                 `;
+
+                doseTimes.forEach((t, i) => {
+                  defaultTimes[i] = t;
+                });
+
+                // 2. 통합된 횟수(count)를 아두이노로 전송
+                sendToArduino('COUNT_' + doseTimes.length);
+
+                lastCheckedMinuteKey = null; // 시간이 바뀌었으니 체크 상태 초기화
             } else {
                 periodDisplay.innerText = "시작일과 종료일을 모두 선택해주세요.";
             }
@@ -287,7 +347,11 @@
             stopAlarmVoice();
         }
 
-        btnStopAlarm.addEventListener('click', hideModal);
+        // 1. 확인(알람 끄기) 버튼 클릭 시 BSA 신호 전송
+        btnStopAlarm.addEventListener('click', () => {
+            hideModal();
+            sendToArduino('BSA');
+        });
 
         function updateStatusUI(signal) {
             messageBox.className = 'flex-1 rounded-2xl p-6 border-2 flex flex-col justify-center items-center min-h-[180px] text-center transition-all duration-500 shadow-inner';
