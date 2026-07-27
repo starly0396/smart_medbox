@@ -153,20 +153,7 @@
         </div>
     </div>
 
-    <!-- 디버그 로그 박스 (화면에서 직접 확인용) -->
-    <div id="debugBox" style="position:fixed; bottom:0; left:0; right:0; max-height:35vh; overflow-y:auto; background:rgba(0,0,0,0.85); color:#0f0; font-family:monospace; font-size:12px; padding:8px; z-index:9999; white-space:pre-wrap;"></div>
-
     <script>
-        function debugLog(msg) {
-            const box = document.getElementById('debugBox');
-            const time = new Date().toLocaleTimeString();
-            const line = document.createElement('div');
-            line.textContent = `[${time}] ${msg}`;
-            box.appendChild(line);
-            box.scrollTop = box.scrollHeight;
-            // 너무 길어지면 오래된 줄 삭제
-            while (box.children.length > 30) box.removeChild(box.firstChild);
-        }
 
         let defaultTimes = ['08:00', '13:00', '19:00'];
         const audioNormal = document.getElementById('audioNormal');
@@ -411,45 +398,6 @@
         let btPollInterval = null;
         let lastPolledValue = null; // 같은 값 연속 처리 방지 (MODE_2가 계속 유지되는 동안 알람 반복 방지)
 
-        function startPolling() {
-            stopPolling(); // 혹시 남아있던 인터벌 정리
-            debugLog('폴링 시작됨');
-            btPollInterval = setInterval(async () => {
-                if (!bluetoothCharacteristic) {
-                    debugLog('characteristic 없음');
-                    return;
-                }
-                try {
-                    const value = await bluetoothCharacteristic.readValue();
-                    const decoder = new TextDecoder('utf-8');
-                    const receivedString = decoder.decode(value).trim();
-
-                    debugLog('읽음: "' + receivedString + '" (길이:' + receivedString.length + ')');
-
-                    if (!receivedString) return;
-                    if (receivedString === lastPolledValue) return; // 이전과 같은 값이면 무시
-                    lastPolledValue = receivedString;
-
-                    debugLog('새 값 감지 → 처리: ' + receivedString);
-
-                    if (receivedString === 'MODE_1') updateStatusUI('A');
-                    else if (receivedString === 'MODE_2') updateStatusUI('B');
-                    else if (receivedString === 'MODE_3') updateStatusUI('C');
-                    else debugLog('알 수 없는 값이라 매칭 안 됨: "' + receivedString + '"');
-                } catch (e) {
-                    debugLog('읽기 에러: ' + e.name + ' / ' + e.message);
-                }
-            }, 1000); // 1초 간격
-        }
-
-        function stopPolling() {
-            if (btPollInterval) {
-                clearInterval(btPollInterval);
-                btPollInterval = null;
-            }
-            lastPolledValue = null;
-        }
-
         async function connectBluetooth() {
             try {
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
@@ -466,10 +414,7 @@
                 await bluetoothCharacteristic.startNotifications();
                 bluetoothCharacteristic.addEventListener('characteristicvaluechanged', handleNotifications);
                 bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
-
-                // 실제로는 이 폴링이 신호를 받아옵니다
-                startPolling();
-
+                
                 statusDot.classList.replace('bg-red-500', 'bg-green-500');
                 statusText.innerText = "약통 연결됨";
                 btnConnect.classList.add('hidden');
@@ -517,10 +462,7 @@
             hideModal();
         }
 
-        btnConnect.addEventListener('click', () => {
-          connectBluetooth();
-          alarmModal.classList.remove('hidden');
-        });
+        btnConnect.addEventListener('click', connectBluetooth);
         btnDisconnect.addEventListener('click', disconnectBluetooth);
     </script>
 </body>
