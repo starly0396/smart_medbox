@@ -395,7 +395,10 @@
         }
 
         // 확인(알람 끄기) 버튼 클릭 시 BSA 신호 전송
-        btnStopAlarm.addEventListener('click', hideModal);
+        btnStopAlarm.addEventListener('click', () => {
+            hideModal();
+            updateStatusUI('S');
+        });
 
         let bluetoothDevice;
         let bluetoothCharacteristic;
