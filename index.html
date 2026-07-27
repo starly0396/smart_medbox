@@ -223,9 +223,9 @@
         const doseCount = document.getElementById('doseCount');
         const timeInputsContainer = document.getElementById('timeInputsContainer');
 
-        /*const messageBox = document.getElementById('messageBox');
+        const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
-        const messageIcon = document.getElementById('messageIcon');*/
+        const messageIcon = document.getElementById('messageIcon');
 
         const alarmModal = document.getElementById('alarmModal');
         const btnStopAlarm = document.getElementById('btnStopAlarm');
@@ -422,9 +422,9 @@
             const decoder = new TextDecoder('utf-8');
             let receivedString = decoder.decode(value).trim();
             
-            if (receivedString.includes('MODE_1')) updateStatusUI('A');
-            else if (receivedString.includes('MODE_2')) updateStatusUI('B');
-            else if (receivedString.includes('MODE_3')) updateStatusUI('C');
+            if (receivedString == 'MODE_1') updateStatusUI('A');
+            else if (receivedString == 'MODE_2') updateStatusUI('B');
+            else if (receivedString == 'MODE_3') updateStatusUI('C');
         }
 
         async function disconnectBluetooth() {
