@@ -443,6 +443,7 @@
             if (bluetoothDevice && bluetoothDevice.gatt.connected) {
                 bluetoothDevice.gatt.disconnect();
             }
+            onDisconnected();
         }
 
         function onDisconnected() {
