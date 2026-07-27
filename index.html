@@ -425,9 +425,9 @@
 
             window.alert(receivedString);
             
-            if (receivedString == 'MODE_1') updateStatusUI('A');
-            else if (receivedString == 'MODE_2') updateStatusUI('B');
-            else if (receivedString == 'MODE_3') updateStatusUI('C');
+            if (receivedString.includes('MODE_1')) updateStatusUI('A');
+            else if (receivedString.includes('MODE_2')) updateStatusUI('B');
+            else if (receivedString.includes('MODE_3')) updateStatusUI('C');
         }
 
         async function disconnectBluetooth() {
