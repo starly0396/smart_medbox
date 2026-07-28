@@ -35,6 +35,26 @@
           flex-direction: column;
           align-items: center;
         }
+
+        #tstbtn {
+          width : 80px;
+          height : 80px;
+          color : white;
+          background-color : rgb(200,0,0);
+          border : solid 3px rgb(100,0,0);
+          border-radius : 50%;
+          
+          position : fixed;
+          top : 90%;
+          left : 80%;
+        }
+
+        #tstbtn:hover {
+          background-color : rgb(180,0,0);
+        }
+        #tstbtn:active {
+          background-color : rgb(160,0,0);
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -71,8 +91,8 @@
                 <p class="text-xs text-gray-400 mt-3">* 아이폰은 Bluefy 앱으로 접속해주세요.</p>
             </div>
 
-            <button id="tstbtn" class="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-5 px-4 rounded-2xl text-2xl shadow-xl transition-colors">
-                테스트 버튼
+            <button id="tstbtn"">
+                테스트<br>버튼
             </button>
 
             <div id="connectErrorWindow" style="display:none">
