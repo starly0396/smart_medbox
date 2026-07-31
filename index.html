@@ -165,8 +165,11 @@
                 <p class="text-2xl font-bold text-gray-800 break-keep leading-relaxed">
                     어르신,<br>지금 약을 드실 시간입니다.
                 </p>
-                <p class="text-red-600 mt-4 font-black text-2xl bg-red-100 py-2 rounded-lg">
+                <p class="text-red-600 mt-4 font-black text-3xl bg-red-100 py-2 rounded-lg">
                     잊지 말고 챙겨 드세요!
+                    <div id="numburcaseopen" class="text-2xl">
+                        (n번 통이 열립니다)
+                    </div>
                 </p>
             </div>
             <div class="p-5 bg-white">
@@ -178,7 +181,8 @@
     </div>
 
     <script>
-
+        let doseTimes = [];              // 중복 제거된 "HH:MM" 시간 배열
+        let opencase = 1;
         let defaultTimes = ['08:00', '13:00', '19:00'];
       
         const audioNormal = document.getElementById('audioNormal');
@@ -323,7 +327,7 @@
         // ==================================================
         // 설정된 복용 시간 목록 + 시간 일치 체크
         // ==================================================
-        let doseTimes = [];              // 중복 제거된 "HH:MM" 시간 배열
+        
         let lastCheckedMinuteKey = null;  // 같은 분(分)에 중복 전송 방지용
 
         function checkScheduleTime() {
@@ -415,6 +419,10 @@
         });
 
         function showModal() {
+            document.getElementById('numburcaseopen').innerHTML = `(${opencase++}번 통이 열립니다.)`;
+            if (opencase>doseTimes.length) {
+                opencase = 1;
+            }
             alarmModal.classList.remove('hidden');
         }
 
